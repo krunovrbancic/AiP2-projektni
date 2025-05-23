@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define BrRijeci 50
+#define BrRijeci 52
 #define MaxDuljina 50
 #define MaxObjasnjenje 345
 #define PlocaRedaka 10
@@ -82,4 +82,51 @@ void pomakniIgraca(int pozicija, char igrac)
         }
     }
     Ploca[redak][kolona] = igrac;
+}
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int izbor;
+
+    cout << "//////  Made by Kruno Vrbancic and Marko Vrbancic  \\\\\\\\\\\\\\\n\n";
+    cout << "                  _      _____           _____ \n"
+            "            /\\   | |    |_   _|   /\\    / ____|\n"
+            "           /  \\  | |      | |    /  \\  | (___ \n"
+            "          / /\\ \\ | |      | |   / /\\ \\ \\ \\   \\ \n"
+            "         / ____ \\| |____ _| |_ /_____ \\ ___)  |\n"
+            "        /_/    \\_\\______|_____/_/    \\_\\_____/\n\n";
+
+    while (true)
+    {
+        cout << "1. Pravila\n";
+        cout << "2. Igraj\n";
+        cout << "3. Izlaz\n";
+        cout << "Unesite Vas izbor: ";
+        cin >> izbor;
+        cout << "\n";
+
+        if (izbor == 1)
+        {
+            prPravila();
+        }
+        else if (izbor == 2)
+        {
+            PokrenutiIgru();
+        }
+        else if (izbor == 3)
+        {
+            cout << "Hvala sto ste igrali nasu igru alias!\n";
+            break;
+        }
+        else
+        {
+            cout << "Krivi unos.\n";
+        }
+
+        cout << "\n\n\n";
+    }
+
+    return 0;
 }
