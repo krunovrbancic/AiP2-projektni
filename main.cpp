@@ -83,6 +83,89 @@ void pomakniIgraca(int pozicija, char igrac)
     }
     Ploca[redak][kolona] = igrac;
 }
+
+void PokrenutiIgru()
+{
+    srand(static_cast<unsigned int>(time(nullptr)));
+    int brIgraca;
+    cout << "Unesite broj igraca: ";
+    cin >> brIgraca;
+
+    if (brIgraca < 2)
+    {
+        cout << "Za ovu igru je potrebno BAREM dva igraca!" << endl;
+        return;
+    }
+
+    char objasnjenje[MaxObjasnjenje];
+    char pogadjanje[MaxDuljina];
+    int randomI;
+    const char *odabranaRijec;
+    int pozicijaIgraca1 = 0, pozicijaIgraca2 = 0;
+    int igrac1 = 1, igrac2 = 2;
+    int tocnoPogodjeno = 0;
+    char trenutniIgrac = '$';
+
+    postaviIgracaNaPocetnuPoziciju();
+    cin.ignore();
+
+    while (pozicijaIgraca1 < 16 && pozicijaIgraca2 < 16)
+    {
+        randomI = rand() % BrRijeci;
+        odabranaRijec = rijeci[randomI];
+
+        cout << "Igrac " << igrac1 << ", trebate objasniti zadanu rijec: " << odabranaRijec << endl;
+        cout << "Napisite objasnjenje zadane rijeci: ";
+        cin.getline(objasnjenje, MaxObjasnjenje);
+        system("clear");
+
+        prikaziPlocu();
+
+        cout << "Igrac " << igrac2 << ", pokusajte pogoditi rijec pomocu objasnjenja: \"" << objasnjenje << "\"" << endl;
+        cout << "Unesite rijec za koju smatrate da je rjesenje: ";
+        cin >> pogadjanje;
+
+        if (strcmp(pogadjanje, odabranaRijec) == 0)
+        {
+            cout << "Bravo! Vas odgovor je tocan" << endl;
+            if (trenutniIgrac == '$')
+            {
+                pozicijaIgraca1++;
+            }
+            else
+            {
+                pozicijaIgraca2++;
+            }
+            tocnoPogodjeno = 1;
+        }
+        else
+        {
+            cout << "Vise srece drugi put, Vas odgovor je netocan. Tocan odgovor je: " << odabranaRijec << endl;
+            tocnoPogodjeno = 0;
+        }
+
+        if (tocnoPogodjeno)
+        {
+            if (trenutniIgrac == '$')
+            {
+                pomakniIgraca(pozicijaIgraca1, '$');
+            }
+            else
+            {
+                pomakniIgraca(pozicijaIgraca2, '@');
+            }
+            prikaziPlocu();
+        }
+
+        trenutniIgrac = (trenutniIgrac == '$') ? '@' : '$';
+        swap(igrac1, igrac2);
+        cin.ignore();
+    }
+
+    cout << "Igrac " << ((pozicijaIgraca1 >= 16) ? 1 : 2) << " je pobijedio!" << endl;
+    cout << "Stigli ste do samog kraja igre te Vam povodom tog cestitamo, pobijedili ste u drustvenoj igri sa vise tocnih odgovora!" << endl;
+}
+
 #include <iostream>
 using namespace std;
 
