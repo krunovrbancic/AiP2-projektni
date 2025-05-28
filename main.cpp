@@ -34,7 +34,6 @@ char Ploca[PlocaRedaka][PlocaStupaca + 1] = {
     "################################"
 };
 
-
 void prPravila() 
 {
     cout << "Ovo su pravila:\n\n";
