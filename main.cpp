@@ -1,10 +1,10 @@
-//Projektni zadatak ALIAS
-#include<iostream>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string>
-#include<string.h>
-#include<time.h>
+// Projektni zadatak ALIAS
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
 #include <array>
 
 using namespace std;
@@ -31,10 +31,9 @@ char Ploca[PlocaRedaka][PlocaStupaca + 1] = {
     "#                           #",
     "#                           #",
     "# KRAJ                      #",
-    "################################"
-};
+    "################################"};
 
-void prPravila() 
+void prPravila()
 {
     cout << "Ovo su pravila:\n\n";
     cout << "1. Za igru su potrebna dva igraca.\n\n";
@@ -44,14 +43,16 @@ void prPravila()
     cout << "5. Kada upisujete rijec koju smatrate tocnim odgovorom koristite mala slova i znakove engleske abecede\n\n";
 }
 
-void prikaziPlocu() {
+void prikaziPlocu()
+{
     for (int i = 0; i < PlocaRedaka; i++)
     {
         cout << Ploca[i] << endl;
     }
 }
 
-void postaviIgracaNaPocetnuPoziciju(){
+void postaviIgracaNaPocetnuPoziciju()
+{
     Ploca[1][10] = '$';
     Ploca[1][21] = '@';
 }
