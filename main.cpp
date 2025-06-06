@@ -5,7 +5,6 @@
 #include <string>
 #include <string.h>
 #include <time.h>
-#include <array>
 
 using namespace std;
 
@@ -21,17 +20,18 @@ const char rijeci[BrRijeci][MaxDuljina] = {
     "karte", "svijetlo", "auto", "torba", "torta", "pas", "zirafa", "slon", "prozor", "kalkulator",
     "matematika", "stol", "slusalice", "ljecnik", "papir", "marker", "zvucnik", "kvaka", "skare",
     "monitor", "voda", "pikado", "dres", "biljeznica", "trofej", "tenisice", "razrednik", "punjac", "upaljac", "deka", "jastuk"};
+
 char Ploca[PlocaRedaka][PlocaStupaca + 1] = {
     "#############################",
-    "# POCETAK                   #",
     "#                           #",
     "#                           #",
     "#                           #",
     "#                           #",
     "#                           #",
     "#                           #",
-    "# KRAJ                      #",
-    "################################"};
+    "#                           #",
+    "#                           #",
+    "#############################"};
 
 void prPravila()
 {
@@ -47,31 +47,23 @@ void prikaziPlocu()
 {
     for (int i = 0; i < PlocaRedaka; i++)
     {
-        cout << Ploca[i] << endl;
+        cout << Ploca[i];
+        if (i == 1)
+            cout << "  <-- POCETAK";
+        if (i == PlocaRedaka - 2)
+            cout << "  <-- KRAJ";
+        cout << endl;
     }
 }
 
 void postaviIgracaNaPocetnuPoziciju()
 {
-    Ploca[1][10] = '$';
-    Ploca[1][21] = '@';
+    Ploca[1][5] = '$';
+    Ploca[1][25] = '@';
 }
 
 void pomakniIgraca(int pozicija, char igrac)
 {
-    int redak = 1;
-    int kolona = (igrac == '$') ? 10 : 21;
-    int kretanje = pozicija * 5;
-
-    for (int i = 0; i < kretanje; ++i)
-    {
-        kolona += 5;
-        if (kolona >= PlocaStupaca - 1)
-        {
-            ++redak;
-            kolona = 1;
-        }
-    }
     for (int i = 0; i < PlocaRedaka; ++i)
     {
         for (int j = 0; j < PlocaStupaca; ++j)
@@ -82,6 +74,15 @@ void pomakniIgraca(int pozicija, char igrac)
             }
         }
     }
+
+    int redak = 1 + pozicija / 5;
+    int kolona = 1 + (pozicija % 5) * 6;
+
+    if (redak >= PlocaRedaka - 1)
+        redak = PlocaRedaka - 2;
+    if (kolona >= PlocaStupaca - 1)
+        kolona = PlocaStupaca - 2;
+
     Ploca[redak][kolona] = igrac;
 }
 
@@ -104,7 +105,6 @@ void PokrenutiIgru()
     const char *odabranaRijec;
     int pozicijaIgraca1 = 0, pozicijaIgraca2 = 0;
     int igrac1 = 1, igrac2 = 2;
-    int tocnoPogodjeno = 0;
     char trenutniIgrac = '$';
 
     postaviIgracaNaPocetnuPoziciju();
@@ -115,60 +115,50 @@ void PokrenutiIgru()
         randomI = rand() % BrRijeci;
         odabranaRijec = rijeci[randomI];
 
-        cout << "Igrac " << igrac1 << ", trebate objasniti zadanu rijec: " << odabranaRijec << endl;
-        cout << "Napisite objasnjenje zadane rijeci: ";
+        cout << "IGRAC " << igrac1 << ", vasa zadana rijec je: \"" << odabranaRijec << "\"" << endl;
+        cout << "Napisite objasnjenje (ne koristiti samu rijec): ";
         cin.getline(objasnjenje, MaxObjasnjenje);
+
+#ifdef _WIN32
+        system("cls");
+#else
         system("clear");
+#endif
 
-        prikaziPlocu();
-
-        cout << "Igrac " << igrac2 << ", pokusajte pogoditi rijec pomocu objasnjenja: \"" << objasnjenje << "\"" << endl;
-        cout << "Unesite rijec za koju smatrate da je rjesenje: ";
-        cin >> pogadjanje;
+        cout << "IGRAC " << igrac2 << ", pokusajte pogoditi rijec pomocu objasnjenja:\n\"" << objasnjenje << "\"\n";
+        cout << "Unesite rijec: ";
+        cin.getline(pogadjanje, MaxDuljina);
 
         if (strcmp(pogadjanje, odabranaRijec) == 0)
         {
-            cout << "Bravo! Vas odgovor je tocan" << endl;
+            cout << "Tocno!" << endl;
             if (trenutniIgrac == '$')
             {
                 pozicijaIgraca1++;
-            }
-            else
-            {
-                pozicijaIgraca2++;
-            }
-            tocnoPogodjeno = 1;
-        }
-        else
-        {
-            cout << "Vise srece drugi put, Vas odgovor je netocan. Tocan odgovor je: " << odabranaRijec << endl;
-            tocnoPogodjeno = 0;
-        }
-
-        if (tocnoPogodjeno)
-        {
-            if (trenutniIgrac == '$')
-            {
                 pomakniIgraca(pozicijaIgraca1, '$');
             }
             else
             {
+                pozicijaIgraca2++;
                 pomakniIgraca(pozicijaIgraca2, '@');
             }
-            prikaziPlocu();
         }
+        else
+        {
+            cout << "Netocno! Tocan odgovor je bio: " << odabranaRijec << endl;
+        }
+
+        prikaziPlocu();
 
         trenutniIgrac = (trenutniIgrac == '$') ? '@' : '$';
         swap(igrac1, igrac2);
-        cin.ignore();
+        cout << "Pritisnite ENTER za nastavak...";
+        cin.get();
     }
 
     cout << "Igrac " << ((pozicijaIgraca1 >= 16) ? 1 : 2) << " je pobijedio!" << endl;
-    cout << "Stigli ste do samog kraja igre te Vam povodom tog cestitamo, pobijedili ste u drustvenoj igri sa vise tocnih odgovora!" << endl;
+    cout << "Cestitamo!" << endl;
 }
-
-#include <iostream>
-using namespace std;
 
 int main()
 {
@@ -189,7 +179,7 @@ int main()
         cout << "3. Izlaz\n";
         cout << "Unesite Vas izbor: ";
         cin >> izbor;
-        cout << "\n";
+        cin.ignore();
 
         if (izbor == 1)
         {
@@ -209,7 +199,7 @@ int main()
             cout << "Krivi unos.\n";
         }
 
-        cout << "\n\n\n";
+        cout << "\n\n";
     }
 
     return 0;
