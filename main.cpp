@@ -60,8 +60,7 @@ void prikaziPlocu()
 
 void postaviIgracaNaPocetnuPoziciju()
 {
-    Ploca[1][5] = '$';
-    Ploca[1][25] = '@';
+    Ploca[1][5] = 'X';
 }
 
 void ocistiIgraceSaPloce()
@@ -156,7 +155,6 @@ void prikaziLeaderboard()
     datoteka.close();
 }
 
-
 void PokrenutiIgru()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -178,6 +176,8 @@ void PokrenutiIgru()
 
     while (pozicijaIgraca1 < 16 && pozicijaIgraca2 < 16)
     {
+        ocistiIgraceSaPloce();
+
         randomI = rand() % BrRijeci;
         odabranaRijec = rijeci[randomI];
 
@@ -245,24 +245,24 @@ int main()
         cout << "4. Izlaz\n";
         cout << "Unesite vas izbor: ";
         cin >> izbor;
-        cin.ignore(); // Očisti ulazni bafer
+        cin.ignore();
 
         switch (izbor)
         {
-            case 1:
-                PokrenutiIgru();
-                break;
-            case 2:
-                prPravila();
-                break;
-            case 3:
-                prikaziLeaderboard();
-                break;
-            case 4:
-                cout << "Hvala na igri! Doviđenja!\n";
-                break;
-            default:
-                cout << "Nepoznata opcija, molimo pokušajte ponovno.\n";
+        case 1:
+            PokrenutiIgru();
+            break;
+        case 2:
+            prPravila();
+            break;
+        case 3:
+            prikaziLeaderboard();
+            break;
+        case 4:
+            cout << "Hvala na igri! Doviđenja!\n";
+            break;
+        default:
+            cout << "Nepoznata opcija, molimo pokušajte ponovno.\n";
         }
     } while (izbor != 4);
 
