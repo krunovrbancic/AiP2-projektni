@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string>
 #include <string.h>
+#include <fstream>
+#include <map>
 #include <time.h>
 
 using namespace std;
@@ -62,60 +64,124 @@ void postaviIgracaNaPocetnuPoziciju()
     Ploca[1][25] = '@';
 }
 
-void pomakniIgraca(int pozicija, char igrac)
+void ocistiIgraceSaPloce()
 {
     for (int i = 0; i < PlocaRedaka; ++i)
     {
         for (int j = 0; j < PlocaStupaca; ++j)
         {
-            if (Ploca[i][j] == igrac)
+            if (Ploca[i][j] == '$' || Ploca[i][j] == '@' || Ploca[i][j] == 'X')
             {
                 Ploca[i][j] = ' ';
             }
         }
     }
+}
 
-    int redak = 1 + pozicija / 5;
-    int kolona = 1 + (pozicija % 5) * 6;
+void pomakniIgraca(int pozicija, char igrac, int pozicijaDrugiIgrac = -1)
+{
+    int korakaURedku = 5;
+    int redak = 1 + (pozicija / korakaURedku);
 
     if (redak >= PlocaRedaka - 1)
         redak = PlocaRedaka - 2;
+
+    int pozicijaURedku = pozicija % korakaURedku;
+    int kolona;
+
+    if ((redak - 1) % 2 == 0)
+    {
+        kolona = 25 - pozicijaURedku * 5;
+    }
+    else
+    {
+        kolona = 5 + pozicijaURedku * 5;
+    }
+
+    if (kolona < 1)
+        kolona = 1;
     if (kolona >= PlocaStupaca - 1)
         kolona = PlocaStupaca - 2;
 
-    Ploca[redak][kolona] = igrac;
+    if (pozicija == pozicijaDrugiIgrac)
+    {
+        Ploca[redak][kolona] = 'X';
+    }
+    else
+    {
+        Ploca[redak][kolona] = igrac;
+    }
 }
+
+void spremiLeaderboard(const string &imePobjednika)
+{
+    map<string, int> leaderboard;
+    ifstream input("leaderboard.txt");
+    string ime;
+    int pobjede;
+
+    while (input >> ime >> pobjede)
+    {
+        leaderboard[ime] = pobjede;
+    }
+    input.close();
+
+    leaderboard[imePobjednika]++;
+
+    ofstream output("leaderboard.txt");
+    for (const auto &par : leaderboard)
+    {
+        output << par.first << " " << par.second << endl;
+    }
+    output.close();
+}
+
+void prikaziLeaderboard()
+{
+    ifstream datoteka("leaderboard.txt");
+    if (!datoteka)
+    {
+        cout << "Leaderboard je prazan ili nije pronaden.\n";
+        return;
+    }
+
+    cout << "\n===== LEADERBOARD =====\n";
+    string ime;
+    int pobjede;
+    while (datoteka >> ime >> pobjede)
+    {
+        cout << ime << " - " << pobjede << " pobjeda" << endl;
+    }
+    cout << "========================\n\n";
+    datoteka.close();
+}
+
 
 void PokrenutiIgru()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
-    int brIgraca;
-    cout << "Unesite broj igraca: ";
-    cin >> brIgraca;
-
-    if (brIgraca < 2)
-    {
-        cout << "Za ovu igru je potrebno BAREM dva igraca!" << endl;
-        return;
-    }
+    string ime1, ime2;
+    cout << "Unesite ime prvog igraca: ";
+    getline(cin, ime1);
+    cout << "Unesite ime drugog igraca: ";
+    getline(cin, ime2);
 
     char objasnjenje[MaxObjasnjenje];
     char pogadjanje[MaxDuljina];
     int randomI;
     const char *odabranaRijec;
     int pozicijaIgraca1 = 0, pozicijaIgraca2 = 0;
-    int igrac1 = 1, igrac2 = 2;
+    string trenutniIme = ime1;
     char trenutniIgrac = '$';
 
     postaviIgracaNaPocetnuPoziciju();
-    cin.ignore();
 
     while (pozicijaIgraca1 < 16 && pozicijaIgraca2 < 16)
     {
         randomI = rand() % BrRijeci;
         odabranaRijec = rijeci[randomI];
 
-        cout << "IGRAC " << igrac1 << ", vasa zadana rijec je: \"" << odabranaRijec << "\"" << endl;
+        cout << trenutniIme << ", vasa zadana rijec je: \"" << odabranaRijec << "\"" << endl;
         cout << "Napisite objasnjenje (ne koristiti samu rijec): ";
         cin.getline(objasnjenje, MaxObjasnjenje);
 
@@ -125,7 +191,8 @@ void PokrenutiIgru()
         system("clear");
 #endif
 
-        cout << "IGRAC " << igrac2 << ", pokusajte pogoditi rijec pomocu objasnjenja:\n\"" << objasnjenje << "\"\n";
+        string drugiIme = (trenutniIme == ime1) ? ime2 : ime1;
+        cout << drugiIme << ", pokusajte pogoditi rijec pomocu objasnjenja:\n\"" << objasnjenje << "\"\n";
         cout << "Unesite rijec: ";
         cin.getline(pogadjanje, MaxDuljina);
 
@@ -135,12 +202,19 @@ void PokrenutiIgru()
             if (trenutniIgrac == '$')
             {
                 pozicijaIgraca1++;
-                pomakniIgraca(pozicijaIgraca1, '$');
+                pomakniIgraca(pozicijaIgraca1, '$', pozicijaIgraca2);
             }
             else
             {
                 pozicijaIgraca2++;
-                pomakniIgraca(pozicijaIgraca2, '@');
+                pomakniIgraca(pozicijaIgraca2, '@', pozicijaIgraca1);
+            }
+
+            if (pozicijaIgraca1 >= 16 || pozicijaIgraca2 >= 16)
+            {
+                string pobjednik = (pozicijaIgraca1 >= 16) ? ime1 : ime2;
+                cout << "Igrac " << pobjednik << " je pobijedio!" << endl;
+                break;
             }
         }
         else
@@ -151,56 +225,46 @@ void PokrenutiIgru()
         prikaziPlocu();
 
         trenutniIgrac = (trenutniIgrac == '$') ? '@' : '$';
-        swap(igrac1, igrac2);
+        trenutniIme = (trenutniIme == ime1) ? ime2 : ime1;
         cout << "Pritisnite ENTER za nastavak...";
         cin.get();
     }
 
-    cout << "Igrac " << ((pozicijaIgraca1 >= 16) ? 1 : 2) << " je pobijedio!" << endl;
-    cout << "Cestitamo!" << endl;
+    spremiLeaderboard((pozicijaIgraca1 >= 16) ? ime1 : ime2);
 }
 
 int main()
 {
     int izbor;
-
-    cout << "//////  Made by Kruno Vrbancic and Marko Vrbancic  \\\\\\\\\\\\\\\n\n";
-    cout << "                  _      _____           _____ \n"
-            "            /\\   | |    |_   _|   /\\    / ____|\n"
-            "           /  \\  | |      | |    /  \\  | (___ \n"
-            "          / /\\ \\ | |      | |   / /\\ \\ \\ \\   \\ \n"
-            "         / ____ \\| |____ _| |_ /_____ \\ ___)  |\n"
-            "        /_/    \\_\\______|_____/_/    \\_\\_____/\n\n";
-
-    while (true)
+    do
     {
-        cout << "1. Pravila\n";
-        cout << "2. Igraj\n";
-        cout << "3. Izlaz\n";
-        cout << "Unesite Vas izbor: ";
+        cout << "Dobrodosli u igru ALIAS!\n";
+        cout << "1. Pokreni igru\n";
+        cout << "2. Pravila igre\n";
+        cout << "3. Leaderboard\n";
+        cout << "4. Izlaz\n";
+        cout << "Unesite vas izbor: ";
         cin >> izbor;
-        cin.ignore();
+        cin.ignore(); // Očisti ulazni bafer
 
-        if (izbor == 1)
+        switch (izbor)
         {
-            prPravila();
+            case 1:
+                PokrenutiIgru();
+                break;
+            case 2:
+                prPravila();
+                break;
+            case 3:
+                prikaziLeaderboard();
+                break;
+            case 4:
+                cout << "Hvala na igri! Doviđenja!\n";
+                break;
+            default:
+                cout << "Nepoznata opcija, molimo pokušajte ponovno.\n";
         }
-        else if (izbor == 2)
-        {
-            PokrenutiIgru();
-        }
-        else if (izbor == 3)
-        {
-            cout << "Hvala sto ste igrali nasu igru alias!\n";
-            break;
-        }
-        else
-        {
-            cout << "Krivi unos.\n";
-        }
-
-        cout << "\n\n";
-    }
+    } while (izbor != 4);
 
     return 0;
 }
